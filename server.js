@@ -50,19 +50,20 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
     const filePath = req.file.path;
 
     // Send audio data to Deepgram
-    const { result, error } = await deepgram.listen.prerecorded.transcribeFile(
-      fs.createReadStream(filePath),
-      {
-        model: "nova-2",
-      }
-    );
-
+    const { response, error } =
+      await deepgram.listen.prerecorded.transcribeFile(
+        fs.createReadStream(filePath),
+        {
+          model: "nova-2",
+        }
+      );
     // Cleanup uploaded file
     fs.unlinkSync(filePath);
-
+    const result =
+      response.result.results.channels[0].alternatives[0].transcript;
     // Return transcription result
     res.json({
-      transcription: result,
+      result,
     });
   } catch (error) {
     if (req.file && req.file.path) {
