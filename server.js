@@ -99,8 +99,6 @@ app.post("/create-text-file", (req, res) => {
   const timestamp = nowDate.getTime();
   const dirname = `${__dirname}/output/${year}-${month}-${day}/`;
   const textFileName = `${fileName}-${timestamp}.txt`;
-  const organization_id = req.body.organization_id || 1; // Define organization_id
-  const user_id = req.body.user_id || 1; // Define user_id
   console.log("Creating text file:", textFileName);
   if (!textString) {
     return res.status(400).json({ error: "Missing text content" });
@@ -118,13 +116,7 @@ app.post("/create-text-file", (req, res) => {
     `attachment; filename="${textFileName}"`
   );
   res.setHeader("Content-Type", "text/plain");
-  knex("service_usage").insert({
-    organization_id,
-    user_id,
-    service: "File processing",
-    audio_duration: 0, // Convert to minutes
-    created_at: new Date(),
-  });
+
   // Send the file as the response
   console.log("Sending file:", dirname + textFileName);
   res.sendFile(dirname + textFileName);
