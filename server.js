@@ -20,6 +20,16 @@ app.use((req, res, next) => {
   console.log("Incoming request:", req.method, req.url, req.headers);
   next();
 });
+
+// Middleware to validate `x-api-key` header
+app.use((req, res, next) => {
+  const clientApiKey = req.headers["x-api-key"];
+  if (!clientApiKey || clientApiKey !== process.env.X_API_KEY) {
+    return res.status(403).json({ error: "Unauthorized: Invalid API Key" });
+  }
+  next();
+});
+
 app.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     console.error("Multer Error:", err.message);
@@ -28,6 +38,7 @@ app.use((err, req, res, next) => {
   console.error("Unexpected Error:", err);
   res.status(500).json({ error: "Internal Server Error" });
 });
+
 // Route to transcribe audio files
 app.post("/transcribe", upload.single("audio"), async (req, res) => {
   try {
