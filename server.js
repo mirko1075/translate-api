@@ -75,13 +75,5 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
   }
 });
 
-// HTTPS options
-const httpsOptions = {
-  key: fs.readFileSync("server.key"),
-  cert: fs.readFileSync("server.cert"),
-};
-
-// Start HTTPS server
-https.createServer(httpsOptions, app).listen(process.env.PORT, () => {
-  console.log(`Server is running at https://localhost:${process.env.PORT}`);
-});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
