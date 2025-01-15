@@ -22,13 +22,13 @@ app.use((req, res, next) => {
 });
 
 // Middleware to validate `x-api-key` header
-app.use((req, res, next) => {
+/* app.use((req, res, next) => {
   const clientApiKey = req.headers["x-api-key"];
   if (!clientApiKey || clientApiKey !== process.env.X_API_KEY) {
     return res.status(403).json({ error: "Unauthorized: Invalid API Key" });
   }
   next();
-});
+}); */
 
 app.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
