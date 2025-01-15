@@ -79,5 +79,56 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
   }
 });
 
+app.post("/create-text-file", (req, res) => {
+  const __dirname = path.resolve();
+  if (!fs.existsSync(`${__dirname}/output`)) {
+    fs.mkdirSync(`${__dirname}/output`);
+  }
+  if (!req.body.text) {
+    return res.status(400).json({ error: "Missing text content" });
+  }
+  if (!req.body.fileName) {
+    return res.status(400).json({ error: "Missing file name" });
+  }
+  const textString = req.body.text; // Assuming the text is sent in the request body
+  const fileName = req.body.fileName || "file"; // Default file name
+  const nowDate = new Date();
+  const day = nowDate.getDate();
+  const month = nowDate.getMonth() + 1; // Months are zero-based
+  const year = nowDate.getFullYear();
+  const timestamp = nowDate.getTime();
+  const dirname = `${__dirname}/output/${year}-${month}-${day}/`;
+  const textFileName = `${fileName}-${timestamp}.txt`;
+  const organization_id = req.body.organization_id || 1; // Define organization_id
+  const user_id = req.body.user_id || 1; // Define user_id
+  console.log("Creating text file:", textFileName);
+  if (!textString) {
+    return res.status(400).json({ error: "Missing text content" });
+  }
+
+  // Ensure the directory exists
+  fs.mkdirSync(dirname, { recursive: true });
+
+  // Write the text string to a file
+  fs.writeFileSync(dirname + textFileName, textString);
+
+  // Set the appropriate headers for file download
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename="${textFileName}"`
+  );
+  res.setHeader("Content-Type", "text/plain");
+  knex("service_usage").insert({
+    organization_id,
+    user_id,
+    service: "File processing",
+    audio_duration: 0, // Convert to minutes
+    created_at: new Date(),
+  });
+  // Send the file as the response
+  console.log("Sending file:", dirname + textFileName);
+  res.sendFile(dirname + textFileName);
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
